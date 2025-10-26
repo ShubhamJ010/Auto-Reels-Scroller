@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Instagram Auto Reels Scroller (Simple)
+// @name         Instagram Auto Reels Scroller
 // @namespace    http://tampermonkey.net/
 // @version      1.0.0
 // @description  Automatically scroll to the next Instagram Reel when one ends. Simple version with toggle functionality.
