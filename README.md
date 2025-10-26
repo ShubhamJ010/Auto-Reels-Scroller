@@ -1,22 +1,15 @@
 # Instagram Auto Reels Scroller (Userscript)
 
-A userscript version of the popular Instagram Auto Reels Scroller, compatible with Tampermonkey, Greasemonkey, and Violentmonkey. This script automatically scrolls to the next Instagram Reel when the current one ends, enhancing your Instagram browsing experience.
+A simplified userscript version of the popular Instagram Auto Reels Scroller, compatible with Tampermonkey, Greasemonkey, and Violentmonkey. This script automatically scrolls to the next Instagram Reel when the current one ends, with a simple ON/OFF toggle functionality.
 
 ## Features
 
 - **Auto-scroll functionality**: Automatically moves to the next reel when the current one finishes
-- **Toggle system**: Turn the feature on/off with a keyboard shortcut or context menu
-- **Configurable settings**:
-  - Scroll direction (up/down)
-  - Number of plays before scrolling
-  - Option to scroll when comments are open
-  - Customizable keyboard shortcut
+- **Simple toggle system**: Turn the feature on/off with a keyboard shortcut or context menu
 - **Visual status indicator**: Shows "Auto ON" or "Auto OFF" in the top-right corner
-- **Settings panel**: Easy-to-use interface to adjust all settings
-- **Persistent storage**: Settings are saved between sessions
+- **Persistent storage**: Toggle state is saved between sessions
 - **Keyboard shortcut**: Default is Shift+S to toggle on/off
 - **Cross-browser compatibility**: Works with Tampermonkey, Greasemonkey, and Violentmonkey
-
 ## Installation
 
 ### Prerequisites
@@ -30,7 +23,8 @@ You need a userscript manager installed in your browser:
 #### Method 1: Direct Installation (Recommended)
 1. Install the appropriate userscript manager from the links above
 2. Click on this direct link to install the script: 
-   [Install Instagram Auto Reels Scroller](https://github.com/ShubhamJ010/Auto-Reels-Scroller/raw/refs/heads/main/instagram-auto-reels-scroller.user.js)
+   [Install Instagram Auto Reels Scroller](https://raw.githubusercontent.com/your-username/Auto-Reels-Scroller/main/instagram-auto-reels-scroller.user.js)
+   (Note: This is a template URL. If using from a specific repository, replace "your-username" with the actual repository owner)
 3. Your userscript manager should detect the script and show an installation dialog
 4. Click "Install" to confirm
 
@@ -81,20 +75,12 @@ The script will automatically activate when you visit Instagram reels pages (`ht
 
 ### Controls
 - **Keyboard shortcut**: Press `Shift + S` to toggle the auto-scroll feature on/off
-- **Context menu**: Right-click on any page and select "Toggle Auto Scroll" or "Settings" from the userscript menu
+- **Context menu**: Right-click on any page and select "Toggle Auto Scroll" from the userscript menu
 - **Visual indicator**: Look for the green (ON) or red (OFF) indicator in the top-right corner
 
-### Settings
-Access settings through:
-- Right-click context menu → "Settings"
-- Or modify the script to add settings access directly to the page
+## Settings
 
-## Settings Explained
-
-- **Scroll Direction**: Choose "Down" to go to the next reel, "Up" to go to the previous reel
-- **Amount of Plays Before Scrolling**: Number of times a video will play before advancing (default: 1)
-- **Scroll When Comments are Open**: Whether to advance when comments are visible (default: Yes)
-- **Toggle Shortcut**: Keyboard combination to turn auto-scroll on/off (default: shift+s)
+This simplified version uses default settings and does not include a settings panel. The functionality is controlled only by the toggle ON/OFF.
 
 ## Compatibility
 
@@ -106,21 +92,21 @@ This userscript is compatible with:
 ## Technical Details
 
 ### Permissions Required
-- `GM_getValue` / `GM_setValue`: For persistent settings storage
-- `GM_addValueChangeListener`: To sync settings across tabs
+- `GM_getValue` / `GM_setValue`: For persistent toggle state storage
+- `GM_addValueChangeListener`: To sync toggle state across tabs
 - `GM_registerMenuCommand`: To add context menu options
 
 ### How It Works
 1. The script monitors the Instagram page for visible video elements
-2. When a video ends, it detects the event and scrolls to the next/previous reel based on settings
-3. The script respects your settings for comments and number of plays
-4. All settings are stored persistently using GM functions
+2. When a video ends, it detects the event and scrolls to the next reel if enabled
+3. The script uses default behavior (scroll down after 1 play, with comments support)
+4. Toggle state is stored persistently using GM functions
 
 ### Script Architecture
 - **DOM Detection**: Uses Intersection Observer patterns to detect visible videos
 - **Event Handling**: Listens for video "ended" events to trigger scrolling
-- **State Management**: Manages settings and state using GM storage
-- **UI Components**: Visual indicator and settings panel injected into the page
+- **State Management**: Manages toggle state using GM storage
+- **UI Components**: Visual indicator injected into the page
 
 ## Troubleshooting
 

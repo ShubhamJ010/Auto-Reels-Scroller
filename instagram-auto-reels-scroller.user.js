@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Instagram Auto Reels Scroller
 // @namespace    http://tampermonkey.net/
-// @version      1.1.0
-// @description  Automatically scroll to the next Instagram Reel when one ends. Enhanced with visual ON/OFF indicator and settings panel. Compatible with Tampermonkey, Greasemonkey, and Violentmonkey.
+// @version      1.2.0
+// @description  Automatically scroll to the next Instagram Reel when one ends. Simple version with toggle functionality.
 // @author       Tyson3101 (converted to Userscript by Qwen)
 // @match        https://www.instagram.com/reels/*
 // @match        https://www.instagram.com/reel/*
@@ -14,95 +14,39 @@
 // @run-at       document-start
 // ==/UserScript==
 
-/*
- * Instagram Auto Reels Scroller - Userscript Version
- * 
- * This script provides automatic scrolling functionality for Instagram Reels,
- * similar to the original Chrome Extension but designed to work with userscript managers
- * such as Tampermonkey, Greasemonkey, and Violentmonkey.
- * 
- * Features:
- * - Auto-scroll to next reel when current one ends
- * - Toggle functionality (ON/OFF)
- * - Configurable settings (direction, plays before scroll, etc.)
- * - Visual status indicator (ON/OFF)
- * - Keyboard shortcut (default: Shift+S)
- * - Settings panel
- * 
- * Compatible with:
- * - Tampermonkey (Chrome/Edge)
- * - Greasemonkey (Firefox) 
- * - Violentmonkey (Cross-browser)
- */
-
 (function() {
     'use strict';
 
-    /**
-     * Default settings for the Instagram Auto Reels Scroller
-     * These values are used when no stored settings exist
-     */
-    const SETTINGS_DEFAULTS = {
-        applicationIsOn: true,        // Whether the auto-scroll feature is enabled
-        scrollDirection: "down",      // Direction to scroll: "down" or "up" 
-        amountOfPlays: 1,             // Number of times to play a reel before scrolling
-        shortCut: ["shift", "s"],     // Keyboard shortcut to toggle the feature
-        scrollOnComments: true        // Whether to scroll when comments are open
+    // Default settings
+    const DEFAULT_SETTINGS = {
+        applicationIsOn: true,
+        scrollDirection: "down",  // "down" or "up"
+        amountOfPlays: 1,         // Number of times to play before scrolling
+        shortCut: ["shift", "s"], // Toggle keyboard shortcut
+        scrollOnComments: true    // Whether to scroll when comments are open
     };
 
-    // DOM selectors for identifying Instagram reels and comments
-    const VIDEOS_LIST_SELECTOR = "main video";  // Selector for video elements in reels
-    const COMMENTS_SELECTOR = ".BasePortal span";  // Selector for comment elements
+    // DOM selectors
+    const VIDEOS_LIST_SELECTOR = "main video";
+    const COMMENTS_SELECTOR = ".BasePortal span";
 
-    // State variables - track the current state of the script
-    let applicationIsOn = GM_getValue("applicationIsOn", SETTINGS_DEFAULTS.applicationIsOn);
-    let scrollDirection = GM_getValue("scrollDirection", SETTINGS_DEFAULTS.scrollDirection);
-    let amountOfPlaysToSkip = GM_getValue("amountOfPlays", SETTINGS_DEFAULTS.amountOfPlays);
-    let shortCutToggleKeys = GM_getValue("shortCut", SETTINGS_DEFAULTS.shortCut);
-    let scrollOnComments = GM_getValue("scrollOnComments", SETTINGS_DEFAULTS.scrollOnComments);
-    let amountOfPlays = 0;  // Counter for how many times current video has played
+    // State variables
+    let applicationIsOn = GM_getValue("applicationIsOn", DEFAULT_SETTINGS.applicationIsOn);
+    let amountOfPlays = 0;  // Counter for plays
 
-    /**
-     * Utility function to create a delay
-     * @param {number} milliseconds - Number of milliseconds to wait
-     * @returns {Promise} Promise that resolves after the specified time
-     */
+    // Utility function to sleep
     const sleep = (milliseconds) => {
         return new Promise((resolve) => setTimeout(resolve, milliseconds));
     };
 
-    /**
-     * Settings change listeners
-     * These functions update the local variables when settings are changed
-     * in another tab or through the settings UI
-     */
+    // Settings change listener for applicationIsOn
     GM_addValueChangeListener("applicationIsOn", (name, oldVal, newVal, remote) => {
         applicationIsOn = newVal;
-        // Update the visual indicator when the status changes
         updateStatusIndicator();
         console.log(`Auto Instagram Reels Scroller status: ${applicationIsOn ? "ON" : "OFF"}`);
     });
 
-    GM_addValueChangeListener("scrollDirection", (name, oldVal, newVal, remote) => {
-        scrollDirection = newVal;
-    });
-
-    GM_addValueChangeListener("amountOfPlays", (name, oldVal, newVal, remote) => {
-        amountOfPlaysToSkip = newVal;
-    });
-
-    GM_addValueChangeListener("shortCut", (name, oldVal, newVal, remote) => {
-        shortCutToggleKeys = newVal;
-    });
-
-    GM_addValueChangeListener("scrollOnComments", (name, oldVal, newVal, remote) => {
-        scrollOnComments = newVal;
-    });
-
-    /**
-     * Starts the auto-scrolling functionality
-     * Enables the feature and updates the stored setting
-     */
+    // Function to start auto scrolling
     function startAutoScrolling() {
         applicationIsOn = true;
         GM_setValue("applicationIsOn", true);
@@ -110,15 +54,11 @@
         console.log("Auto Instagram Reels Scroller: ON");
     }
 
-    /**
-     * Stops the auto-scrolling functionality
-     * Disables the feature, updates the stored setting, and enables video looping
-     */
+    // Function to stop auto scrolling
     function stopAutoScrolling() {
         applicationIsOn = false;
         const currentVideo = getCurrentVideo();
         if (currentVideo) {
-            // Enable looping when the feature is turned off to prevent auto-scrolling
             currentVideo.setAttribute("loop", "true");
         }
         GM_setValue("applicationIsOn", false);
@@ -126,20 +66,8 @@
         console.log("Auto Instagram Reels Scroller: OFF");
     }
 
-    /**
-     * Handles the event when a video ends
-     * Determines whether to scroll to the next video based on settings
-     */
+    // Function that handles the end of a video
     async function endVideoEvent() {
-        console.log({
-            amountOfPlays,
-            amountOfPlaysToSkip,
-            scrollDirection,
-            applicationIsOn,
-            currentVideo: getCurrentVideo(),
-        });
-
-        // Get all video elements on the page
         const VIDEOS_LIST = Array.from(
             document.querySelectorAll(VIDEOS_LIST_SELECTOR)
         );
@@ -147,47 +75,35 @@
         const currentVideo = getCurrentVideo();
         if (!currentVideo) return;
 
-        // If the feature is disabled, make the video loop instead of scrolling
         if (!applicationIsOn) {
             currentVideo?.setAttribute("loop", "true");
+            return;
         }
 
-        // Increment the play counter
         amountOfPlays++;
-        // Check if we've played enough times before scrolling
-        if (amountOfPlays < amountOfPlaysToSkip) return;
+        // With default settings, always scroll after one play
+        if (amountOfPlays < DEFAULT_SETTINGS.amountOfPlays) return;
 
-        // Find the index of the current video in the list
         const index = VIDEOS_LIST.findIndex(
             (vid) => vid.src && vid.src === currentVideo.src
         );
-        // Determine the next video based on scroll direction
-        let nextVideo = VIDEOS_LIST[index + (scrollDirection === "down" ? 1 : -1)];
+        let nextVideo = VIDEOS_LIST[index + (DEFAULT_SETTINGS.scrollDirection === "down" ? 1 : -1)];
 
-        // Check if comments are open and if we should wait before scrolling
-        if (!scrollOnComments && checkIfCommentsAreOpen()) {
-            // Pause the current video and wait for comments to close
+        if (!DEFAULT_SETTINGS.scrollOnComments && checkIfCommentsAreOpen()) {
             currentVideo.pause();
             let checkInterval = setInterval(() => {
-                // Scroll when comments are closed or when the setting allows scrolling with comments open
-                if (scrollOnComments || !checkIfCommentsAreOpen()) {
+                if (DEFAULT_SETTINGS.scrollOnComments || !checkIfCommentsAreOpen()) {
                     scrollToNextVideo();
                     clearInterval(checkInterval);
                 }
             }, 100);
         } else {
-            // Scroll immediately to the next video
             scrollToNextVideo();
         }
 
-        /**
-         * Scrolls to the next video in the sequence
-         * Resets the play counter after scrolling
-         */
         function scrollToNextVideo() {
             if (nextVideo) {
-                amountOfPlays = 0; // Reset the play counter
-                // Scroll smoothly to the next video
+                amountOfPlays = 0;
                 nextVideo.scrollIntoView({
                     behavior: "smooth",
                     inline: "center",
@@ -197,17 +113,12 @@
         }
     }
 
-    /**
-     * Gets the currently visible video element
-     * Uses viewport intersection to determine which video is currently in view
-     * @returns {HTMLVideoElement|null} The visible video element or null if none found
-     */
+    // Function to get current video that's in view
     function getCurrentVideo() {
         const videos = Array.from(document.querySelectorAll(VIDEOS_LIST_SELECTOR));
         return videos.find((video) => {
             const videoRect = video.getBoundingClientRect();
 
-            // Check if the video element is within the viewport
             const isVideoInView =
                 videoRect.top >= 0 &&
                 videoRect.left >= 0 &&
@@ -220,55 +131,42 @@
         }) || null;
     }
 
-    /**
-     * Checks if comments are currently open on the page
-     * @returns {boolean} True if comments are open, false otherwise
-     */
+    // Function to check if comments are open
     function checkIfCommentsAreOpen() {
         const comments = document.querySelector(COMMENTS_SELECTOR);
         return !!(comments && comments.textContent && comments.textContent.length);
     }
 
-    /**
-     * Main loop function that continuously monitors for video elements
-     * Adds event listeners to videos when the feature is enabled
-     */
+    // Main loop function
     (async function loop() {
         (function addVideoEndEvent() {
             if (applicationIsOn) {
                 const currentVideo = getCurrentVideo();
                 if (currentVideo) {
-                    // Remove the loop attribute to allow the ended event to fire
                     currentVideo.removeAttribute("loop");
                     // Remove existing event listener to prevent duplicates
                     currentVideo.removeEventListener("ended", endVideoEvent);
-                    // Add the event listener for when the video ends
                     currentVideo.addEventListener("ended", endVideoEvent);
+                }
+            } else {
+                // If disabled, remove event listeners from current videos
+                const currentVideo = getCurrentVideo();
+                if (currentVideo) {
+                    currentVideo.setAttribute("loop", "true");
+                    currentVideo.removeEventListener("ended", endVideoEvent);
                 }
             }
         })();
 
-        // Wait before the next iteration to avoid excessive processing
         await sleep(100);
-        // Use requestAnimationFrame for efficient looping
         requestAnimationFrame(loop);
     })();
 
-    /**
-     * Keyboard shortcut listener
-     * Listens for key combinations to toggle the auto-scroll feature
-     * Uses a debounced approach to properly detect chorded key combinations
-     */
+    // Keyboard shortcut listener
     (function shortCutListener() {
-        const pressedKeys = [];  // Array to store currently pressed keys
-        const debounceDelay = 700;  // Delay to prevent multiple triggers
+        const pressedKeys = [];
+        const debounceDelay = 700;
 
-        /**
-         * Debounces a function call
-         * @param {Function} cb - Callback function to debounce
-         * @param {number} delay - Delay in milliseconds
-         * @returns {Function} Debounced function
-         */
         function debounce(cb, delay) {
             let timeout;
 
@@ -280,11 +178,6 @@
             };
         }
 
-        /**
-         * Checks if the currently pressed keys match the configured shortcut
-         * @param {string[]} keysToCheck - Array of keys that make up the shortcut
-         * @returns {Promise<boolean>} Promise that resolves to true if keys match
-         */
         const checkKeys = (keysToCheck) => {
             return new Promise((resolve) => {
                 function debounceCB() {
@@ -303,48 +196,24 @@
             });
         };
 
-        // Add keydown event listener to detect the keyboard shortcut
         document.addEventListener("keydown", async (e) => {
             if (!e.key) return;
-            // Add the pressed key to the array (converted to lowercase for comparison)
             pressedKeys.push(e.key.toLowerCase());
 
-            // Check if the currently pressed keys match the shortcut
-            if (await checkKeys(shortCutToggleKeys)) {
-                // Toggle the auto-scroll feature
+            if (await checkKeys(DEFAULT_SETTINGS.shortCut)) {
                 if (applicationIsOn) {
                     stopAutoScrolling();
                 } else {
                     startAutoScrolling();
                 }
             }
-            // Clear the pressed keys array after processing
-            pressedKeys.length = 0;
+            pressedKeys.length = 0; // Clear the array
         });
     })();
 
-    // Initialize the script
-    console.log(`Auto Instagram Reels Scroller is Running\nStatus: ${applicationIsOn ? "ON" : "OFF"}`);
-
-    // Add Tampermonkey menu commands for quick toggle
-    GM_registerMenuCommand("Toggle Auto Scroll", () => {
-        if (applicationIsOn) {
-            stopAutoScrolling();
-        } else {
-            startAutoScrolling();
-        }
-    });
-
-    GM_registerMenuCommand("Settings", () => {
-        showSettingsUI();
-    });
-
-    /**
-     * Creates the visual status indicator element
-     * Displays "Auto ON" or "Auto OFF" in the top-right corner of the page
-     */
+    // Create visual status indicator
     function createStatusIndicator() {
-        // Remove existing indicator if it exists to prevent duplicates
+        // Remove existing indicator if it exists
         const existingIndicator = document.getElementById('auto-reels-status-indicator');
         if (existingIndicator) {
             existingIndicator.remove();
@@ -394,17 +263,13 @@
         document.body.appendChild(indicator);
     }
 
-    // Initialize the status indicator when the script loads
+    // Initialize the status indicator
     createStatusIndicator();
 
-    /**
-     * Updates the visual status indicator to reflect the current state
-     * Changes color and text based on whether the feature is enabled or disabled
-     */
+    // Update the status indicator when the setting changes
     function updateStatusIndicator() {
         const indicator = document.getElementById('auto-reels-status-indicator');
         if (indicator) {
-            // Update the indicator with the current status
             indicator.innerHTML = `
                 <div style="
                     position: fixed;
@@ -445,115 +310,14 @@
                 </div>
             `;
         } else {
-            // If the indicator doesn't exist, create it
             createStatusIndicator();
         }
     }
 
-    /**
-     * Creates and displays the settings UI
-     * Provides controls for all configurable options
-     */
-    function showSettingsUI() {
-        const settingsHTML = `
-            <div id="instagram-auto-reels-settings" style="position: fixed; top: 20%; left: 50%; transform: translateX(-50%); background: white; padding: 20px; border: 2px solid #333; border-radius: 10px; z-index: 10000; box-shadow: 0 4px 8px rgba(0,0,0,0.3); font-family: Arial, sans-serif; max-width: 500px; width: 90%;">
-                <h2 style="margin-top: 0; text-align: center;">Auto Reels Scroller Settings</h2>
-                
-                <div style="margin-bottom: 15px;">
-                    <label><strong>Scroll Direction:</strong></label>
-                    <select id="scrollDirectionSetting" style="margin-left: 10px; padding: 5px;">
-                        <option value="down" ${scrollDirection === "down" ? "selected" : ""}>Down</option>
-                        <option value="up" ${scrollDirection === "up" ? "selected" : ""}>Up</option>
-                    </select>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <label><strong>Amount of Plays Before Scrolling:</strong></label>
-                    <input type="number" id="amountOfPlaysSetting" value="${amountOfPlaysToSkip}" min="1" style="margin-left: 10px; padding: 5px; width: 60px;">
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <label><strong>Scroll When Comments are Open:</strong></label>
-                    <select id="scrollOnCommentsSetting" style="margin-left: 10px; padding: 5px;">
-                        <option value="true" ${scrollOnComments === true ? "selected" : ""}>Yes</option>
-                        <option value="false" ${scrollOnComments === false ? "selected" : ""}>No</option>
-                    </select>
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <label><strong>Toggle Shortcut (e.g. shift+s):</strong></label>
-                    <input type="text" id="shortCutSetting" value="${shortCutToggleKeys.join('+')}" style="margin-left: 10px; padding: 5px; width: 100px;">
-                </div>
-                
-                <div style="text-align: center; margin-top: 20px;">
-                    <button id="saveSettingsBtn" style="padding: 8px 15px; margin-right: 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Save</button>
-                    <button id="closeSettingsBtn" style="padding: 8px 15px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">Close</button>
-                </div>
-            </div>
-            
-            <div id="settings-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999;"></div>
-        `;
-        
-        // Add the settings UI to the page
-        document.body.insertAdjacentHTML('beforeend', settingsHTML);
-        
-        // Add event listeners for the close button and overlay
-        document.getElementById('closeSettingsBtn').addEventListener('click', closeSettings);
-        document.getElementById('settings-overlay').addEventListener('click', closeSettings);
-        
-        // Add event listener for the save button
-        document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
-        
-        /**
-         * Closes the settings UI and removes it from the page
-         */
-        function closeSettings() {
-            const settingsDiv = document.getElementById('instagram-auto-reels-settings');
-            const overlay = document.getElementById('settings-overlay');
-            if (settingsDiv) settingsDiv.remove();
-            if (overlay) overlay.remove();
-            // Update status indicator when closing settings
-            updateStatusIndicator();
-        }
-        
-        /**
-         * Saves the settings to storage and updates the script state
-         */
-        function saveSettings() {
-            // Get updated values from the form
-            const newScrollDirection = document.getElementById('scrollDirectionSetting').value;
-            const newAmountOfPlays = parseInt(document.getElementById('amountOfPlaysSetting').value);
-            const newScrollOnComments = document.getElementById('scrollOnCommentsSetting').value === "true";
-            const newShortCut = document.getElementById('shortCutSetting').value.toLowerCase().split('+');
-            
-            // Update global variables with new values
-            scrollDirection = newScrollDirection;
-            amountOfPlaysToSkip = newAmountOfPlays;
-            scrollOnComments = newScrollOnComments;
-            shortCutToggleKeys = newShortCut;
-            
-            // Save settings to persistent storage
-            GM_setValue("scrollDirection", newScrollDirection);
-            GM_setValue("amountOfPlays", newAmountOfPlays);
-            GM_setValue("scrollOnComments", newScrollOnComments);
-            GM_setValue("shortCut", newShortCut);
-            
-            // Close the settings UI
-            closeSettings();
-            
-            alert("Settings saved successfully!");
-        }
-    }
+    // Initialize the script
+    console.log(`Auto Instagram Reels Scroller is Running\nStatus: ${applicationIsOn ? "ON" : "OFF"}`);
 
-    // Update status indicator when settings change
-    // This ensures the visual indicator reflects the applicationIsOn status
-    GM_addValueChangeListener("applicationIsOn", (name, oldVal, newVal, remote) => {
-        applicationIsOn = newVal;
-        console.log(`Auto Instagram Reels Scroller status: ${applicationIsOn ? "ON" : "OFF"}`);
-        updateStatusIndicator();
-    });
-
-    // Add Tampermonkey menu commands for quick access to features
+    // Add Tampermonkey menu commands
     GM_registerMenuCommand("Toggle Auto Scroll", () => {
         if (applicationIsOn) {
             stopAutoScrolling();
@@ -561,9 +325,4 @@
             startAutoScrolling();
         }
     });
-
-    GM_registerMenuCommand("Settings", () => {
-        showSettingsUI();
-    });
-
 })();
