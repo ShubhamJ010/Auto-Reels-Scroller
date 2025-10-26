@@ -1,29 +1,153 @@
-# [Auto-Reels-Scroller](https://github.com/Tyson3101/Auto-Reels-Scroller)
+# Instagram Auto Reels Scroller (Userscript)
 
-## A Chrome Extension that adds an auto-scroll feature on Instagram Reels so you can watch Reels without the need to touch your mouse.
+A userscript version of the popular Instagram Auto Reels Scroller, compatible with Tampermonkey, Greasemonkey, and Violentmonkey. This script automatically scrolls to the next Instagram Reel when the current one ends, enhancing your Instagram browsing experience.
 
-<img src="./extension/img/Icon128.png"/>
+## Features
 
-#### Whenever a Instagram Reel ends, the extension will automatically scroll to the next one for you.
+- **Auto-scroll functionality**: Automatically moves to the next reel when the current one finishes
+- **Toggle system**: Turn the feature on/off with a keyboard shortcut or context menu
+- **Configurable settings**:
+  - Scroll direction (up/down)
+  - Number of plays before scrolling
+  - Option to scroll when comments are open
+  - Customizable keyboard shortcut
+- **Visual status indicator**: Shows "Auto ON" or "Auto OFF" in the top-right corner
+- **Settings panel**: Easy-to-use interface to adjust all settings
+- **Persistent storage**: Settings are saved between sessions
+- **Keyboard shortcut**: Default is Shift+S to toggle on/off
+- **Cross-browser compatibility**: Works with Tampermonkey, Greasemonkey, and Violentmonkey
 
-- Extension: [Click here](./README.md#extension)
+## Installation
 
-- Bookmarklet: NOT YET
+### Prerequisites
+You need a userscript manager installed in your browser:
+- **Chrome/Edge**: [Tampermonkey](https://www.tampermonkey.net/)
+- **Firefox**: [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/) or [Violentmonkey](https://addons.mozilla.org/en-US/firefox/addon/violentmonkey/)
+- **Other browsers**: [Violentmonkey](https://violentmonkey.github.io/get-it/) (available for Chrome, Firefox, Edge, and others)
 
-## Extension
+### Installation Steps
 
-**Option 1** – Install it from the [Chrome Web Store](https://chrome.google.com/webstore/detail/bpgleagdakihfeingnhnknblcfgbfcdo)
+#### Method 1: Direct Installation (Recommended)
+1. Install the appropriate userscript manager from the links above
+2. Click on this direct link to install the script: 
+   [Install Instagram Auto Reels Scroller](https://raw.githubusercontent.com/your-username/Auto-Reels-Scroller/main/instagram-auto-reels-scroller.user.js)
+   (Note: This is a template URL. If using from a specific repository, replace "your-username" with the actual repository owner)
+3. Your userscript manager should detect the script and show an installation dialog
+4. Click "Install" to confirm
 
-**Option 2** – Install it from source:
+#### Method 2: Manual Installation from Repository
+1. Navigate to the `instagram-auto-reels-scroller.user.js` file in this repository
+2. Click on the file to view its content
+3. Click the "Raw" button to view the raw script content
+4. Your userscript manager should detect the script and offer to install it
+5. Click "Install" to add the script to your userscript manager
 
-- Clone/download this repo,
-- Open Chrome and go to `chrome://extensions`,
-- Enable "Developer mode",
-- Click "Load unpacked extension",
-- Select the `extension` folder from this repo.
+#### Method 3: Copy-Paste Method
+1. Install your preferred userscript manager (Tampermonkey, Greasemonkey, or Violentmonkey)
+2. Go to the script file in this repository and copy all the content
+3. Open your userscript manager dashboard
+4. Click "Create a new script" or the "+" button
+5. Paste the copied content into the editor
+6. Save the script
 
-<img src="./img/ScreenshotAutoInstagramReels.png" width="500" height="400" />
+#### Method 4: For Each Specific Manager
 
-##### If you have any suggestions or experience problems, post an issue on the GitHub page: [https://github.com/Tyson3101/Auto-Reels-Scroller/issues](https://github.com/Tyson3101/Auto--Reels-Scroller/issues)
+**For Tampermonkey (Chrome/Edge):**
+1. Install Tampermonkey from the Chrome Web Store or Edge Add-ons
+2. Go to the script file in this repository
+3. Click the "Raw" button to view the raw content
+4. The Tampermonkey icon will appear in your address bar with an install option
+5. Click the Tampermonkey icon and select "Install"
 
-###### By Tyson3101
+**For Greasemonkey (Firefox):**
+1. Install Greasemonkey from Firefox Add-ons
+2. Go to the script file in this repository
+3. Click the "Raw" button to view the raw content
+4. Firefox will recognize it as a userscript and offer to install
+5. Click "Install" when prompted
+
+**For Violentmonkey (Cross-browser):**
+1. Install Violentmonkey from the appropriate add-ons store for your browser
+2. Go to the script file in this repository
+3. Click the "Raw" button to view the raw content
+4. The Violentmonkey icon will show an install option
+5. Click the Violentmonkey icon and select "Install"
+
+Alternatively, you can copy the entire script content and create a new script in your userscript manager.
+
+## Usage
+
+### On Instagram Reels Pages
+The script will automatically activate when you visit Instagram reels pages (`https://www.instagram.com/reels/*` and `https://www.instagram.com/reel/*`).
+
+### Controls
+- **Keyboard shortcut**: Press `Shift + S` to toggle the auto-scroll feature on/off
+- **Context menu**: Right-click on any page and select "Toggle Auto Scroll" or "Settings" from the userscript menu
+- **Visual indicator**: Look for the green (ON) or red (OFF) indicator in the top-right corner
+
+### Settings
+Access settings through:
+- Right-click context menu → "Settings"
+- Or modify the script to add settings access directly to the page
+
+## Settings Explained
+
+- **Scroll Direction**: Choose "Down" to go to the next reel, "Up" to go to the previous reel
+- **Amount of Plays Before Scrolling**: Number of times a video will play before advancing (default: 1)
+- **Scroll When Comments are Open**: Whether to advance when comments are visible (default: Yes)
+- **Toggle Shortcut**: Keyboard combination to turn auto-scroll on/off (default: shift+s)
+
+## Compatibility
+
+This userscript is compatible with:
+- **Tampermonkey** (Chrome, Edge, Safari, Opera)
+- **Greasemonkey** (Firefox)
+- **Violentmonkey** (Chrome, Firefox, Edge, and other Chromium-based browsers)
+
+## Technical Details
+
+### Permissions Required
+- `GM_getValue` / `GM_setValue`: For persistent settings storage
+- `GM_addValueChangeListener`: To sync settings across tabs
+- `GM_registerMenuCommand`: To add context menu options
+
+### How It Works
+1. The script monitors the Instagram page for visible video elements
+2. When a video ends, it detects the event and scrolls to the next/previous reel based on settings
+3. The script respects your settings for comments and number of plays
+4. All settings are stored persistently using GM functions
+
+### Script Architecture
+- **DOM Detection**: Uses Intersection Observer patterns to detect visible videos
+- **Event Handling**: Listens for video "ended" events to trigger scrolling
+- **State Management**: Manages settings and state using GM storage
+- **UI Components**: Visual indicator and settings panel injected into the page
+
+## Troubleshooting
+
+### Script Not Working
+- Ensure you're on an Instagram reels page (`/reels/` or `/reel/` URLs)
+- Check that your userscript manager is enabled
+- Verify the script is enabled in your userscript manager dashboard
+
+### Settings Not Saving
+- Make sure GM functions are properly enabled in your userscript manager
+- Check browser console for any error messages (Ctrl+Shift+J in most browsers)
+
+### Visual Indicator Issues
+- The indicator is positioned in the top-right corner - it may be hidden if other elements overlap
+- Try refreshing the page if the indicator doesn't update properly
+
+## Contributing
+
+Feel free to fork this repository and submit pull requests for improvements. If you find any bugs or have feature suggestions, please open an issue.
+
+## License
+
+This project is based on the original Auto-Reels-Scroller extension by Tyson3101 and converted to userscript format. The original license and attribution information is maintained.
+
+## Credits
+
+- Original Chrome Extension by Tyson3101
+- Userscript conversion by Qwen (part of the Auto-Reels-Scroller project)
+- Visual indicator icon from Pinterest
