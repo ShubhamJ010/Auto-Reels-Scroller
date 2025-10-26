@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      1.0.0
 // @description  Automatically scroll to the next Instagram Reel when one ends. Simple version with toggle functionality.
-// @author       Tyson3101 (converted to Userscript by Qwen)
+// @author       Tyson3101 (converted to Userscript by ShubhamJ010)
 // @match        https://www.instagram.com/reels/*
 // @match        https://www.instagram.com/reel/*
 // @grant        GM_getValue
