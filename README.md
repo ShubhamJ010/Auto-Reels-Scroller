@@ -30,8 +30,7 @@ You need a userscript manager installed in your browser:
 #### Method 1: Direct Installation (Recommended)
 1. Install the appropriate userscript manager from the links above
 2. Click on this direct link to install the script: 
-   [Install Instagram Auto Reels Scroller](https://raw.githubusercontent.com/your-username/Auto-Reels-Scroller/main/instagram-auto-reels-scroller.user.js)
-   (Note: This is a template URL. If using from a specific repository, replace "your-username" with the actual repository owner)
+   [Install Instagram Auto Reels Scroller](https://raw.githubusercontent.com/shubhamj010Auto-Reels-Scroller/main/instagram-auto-reels-scroller.user.js)
 3. Your userscript manager should detect the script and show an installation dialog
 4. Click "Install" to confirm
 
